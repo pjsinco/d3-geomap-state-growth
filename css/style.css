@@ -1,0 +1,19 @@
+body {
+  font-family: sans-serif;
+  color: #888;
+}
+
+.vis {
+  max-width: 40.625em;
+  margin: 0 auto;
+  /*background: aliceblue;*/
+}
+
+svg .state {
+  stroke: #fff;
+  stroke-width: 1;
+}
+
+svg .state:hover {
+  fill-opacity: 0.5;
+}
