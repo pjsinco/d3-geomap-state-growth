@@ -43,20 +43,28 @@ var projection = d3.geo.albersUsa()
 var path = d3.geo.path()
   .projection(projection);
 
-var color = d3.scale.quantize()
-  //.range(['rgb(239,243,255)', 'rgb(189,215,231)', 'rgb(107,174,214)',
-    //'rgb(49,130,189)','rgb(8,81,156)']);
-  .range(
-    [
-      'rgb(198,219,239)','rgb(158,202,225)',
-      'rgb(107,174,214)','rgb(66,146,198)','rgb(33,113,181)',
-      'rgb(8,69,148)'
-    ]
-  );
+var buckets = [0.20, 0.30, 0.40, 0.50, 0.60];
+
+var color = d3.scale.threshold()
+  .domain(buckets)
+  .range([
+    'rgb(198,219,239)','rgb(158,202,225)', 'rgb(107,174,214)',
+    'rgb(66,146,198)','rgb(33,113,181)', 'rgb(8,69,148)'
+  ]);
+
+/**
+ * When mousing over a state, we need to move that <path> element to the 
+ * front in order to properly expand the stroke width. Otherwise,
+ * the stroke might be overlapped by other <path> elems.
+ */
+d3.selection.prototype.moveToFront = function() {
+  return this.each(function() {
+    this.parentNode.appendChild(this);
+  });
+};
 
 
 d3.csv('data/state-change.csv', function(csv) {
-
   csv = csv.map(function(d) {
     return {
       "2009": +d['2009'],
@@ -80,11 +88,10 @@ d3.csv('data/state-change.csv', function(csv) {
 
   console.log(minPctChange, maxPctChange);
 
-  color
-    .domain([minPctChange, maxPctChange]);
+  //color
+    //.domain([minPctChange, maxPctChange]);
 
   d3.json('data/us-named.json', function(error, json) {
-  
     var usMap = topojson.feature(json, json.objects.states);
     var csvLen = csv.length;
 
@@ -106,6 +113,45 @@ d3.csv('data/state-change.csv', function(csv) {
         }
       }
     }
+
+  var legendGroup = g.append('g')
+    .classed('legend-group', true);
+
+    var legend = legendGroup.selectAll('.legend')
+      .data(buckets)
+      .enter()
+      .append('g')
+      .classed('legend', true)
+
+    var legendW = 20, legendH = 20;
+
+    legend
+      .append('rect')
+      .attr({
+        x: 20,
+        y: function(d, i) {
+          return height - (i * legendH) - (2 * legendH);
+        },
+        width: legendW,
+        height: legendH,
+      })
+      .style({
+        fill: function(d, i) {
+          return color(d);
+        }
+      })
+
+    legend
+      .append('text')
+      .attr({
+        x: 50,
+        y: function(d, i) {
+          return height - (i * legendH) - legendH - 4;
+        },
+      })
+      .text(function(d, i) {
+        return buckets[i];
+      });
     
     var states = g.selectAll('.state')
       .data(usMap.features)
@@ -119,10 +165,19 @@ d3.csv('data/state-change.csv', function(csv) {
 
     states
       .on('mouseover', stateMouseover)
+      .on('mouseout', function() {
+        d3.select(this).style('stroke-width', 1);
+      });
   });
 }); // d3.csv
 
 function stateMouseover(d) {
+
+  var sel = d3.select(this);
+  sel.moveToFront();
+  sel
+    .style('stroke-width', '3');
+
   focus
     .select('text')
     .remove();
@@ -132,6 +187,7 @@ function stateMouseover(d) {
     .attr('x', 10)
     .attr('y', 20)
     .text(function() {
-      return d.properties.name;
+      return d.properties.name + ' ' + 
+        d.properties.pct_change
     })
 }

@@ -15,5 +15,5 @@ svg .state {
 }
 
 svg .state:hover {
-  fill-opacity: 0.5;
+  /*fill-opacity: 0.5;*/
 }
