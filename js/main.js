@@ -1,47 +1,49 @@
 var margin = { 
-  top: 20,
+  //top: 20,
+  top: 0,
   bottom: 20,
-  left: 20,
+  left: 0,
   right: 20
 };
 
 var margin2 = {
-  top: 20,
+  top: 400,
   bottom: 20,
-  left: 20,
+  left: 0,
   right: 20
 };
 
-var width = 655 - margin.left - margin.right;
-var height = 437 - margin.top - margin.bottom;
-
-var width2 = 655 - margin2.left - margin2.right;
-var height2 = 200 - margin2.top - margin2.bottom;
+var width = 655 - margin.left - margin.right,
+  height = 437 - margin.top - margin.bottom,
+  width2 = 655 - margin2.left - margin2.right,
+  height2 = 200 - margin2.top - margin2.bottom;
 
 var svg = d3.select('.vis').append('svg')
-  //.attr('width', width + margin.left + margin.right)
-  //.attr('height', width + margin.top + margin.bottom)
-  .attr('viewBox', '0 0 ' + width + ' ' + height)
-  .classed('context', true)
+  .attr('width', width + margin.left + margin.right)
+  .attr('height', height + margin.top + margin.bottom)
+  .call(responsivefy);
 
-var g = svg.append('g')
+var context = svg.append('g')
   .classed('country', true)
-  //.attr('transform', 'translate(' +
-    //margin.left + ',' + margin.top + ')'
-  //);
+  .attr('transform', 'translate(' +
+    margin.left + ',' + margin.top + ')'
+  );
 
-var focus = d3.select('.vis').append('svg')
-  .attr('viewBox', '0 0 ' + width2 + ' ' + height2)
-  .classed('context', true)
+var focus = svg.append('g')
+  .classed('focus', true)
+  .attr('width', width2 + margin2.left + margin2.right)
+  .attr('height', height2 + margin2.top + margin2.bottom)
+  .attr('transform', 'translate(' +
+    margin2.left + ',' + margin2.top + ')'
+  );
+
+var defaultMapScale = 800;
 
 var projection = d3.geo.albersUsa()
   .translate([width / 2, height / 2])
-  .scale([800])
-  //.precision(0.1)
-  //.translate([width, height])
+  .scale([defaultMapScale])
 
-var path = d3.geo.path()
-  .projection(projection);
+var path = d3.geo.path().projection(projection);
 
 var buckets = [0.20, 0.30, 0.40, 0.50, 0.60];
 
@@ -88,9 +90,6 @@ d3.csv('data/state-change.csv', function(csv) {
 
   console.log(minPctChange, maxPctChange);
 
-  //color
-    //.domain([minPctChange, maxPctChange]);
-
   d3.json('data/us-named.json', function(error, json) {
     var usMap = topojson.feature(json, json.objects.states);
     var csvLen = csv.length;
@@ -114,8 +113,96 @@ d3.csv('data/state-change.csv', function(csv) {
       }
     }
 
-  var legendGroup = g.append('g')
-    .classed('legend-group', true);
+    drawLegend();
+    
+    /**
+     * Draw the map
+     *
+     */
+    var states = context.selectAll('.state')
+      .data(usMap.features)
+      .enter()
+      .append('path')
+      .attr('d', path)
+      .style('fill', function(d) {
+        return color(d['properties']['pct_change']);
+      })
+      .classed('state', true)
+
+    states
+      .on('mouseover', stateMouseover)
+      .on('mouseout', function() {
+        d3.select(this)
+          .style('stroke-width', 1)
+          .style('stroke', '#fff');
+      });
+  });
+
+  //d3.select(window)
+    //.on('resize', resize);
+}); // d3.csv
+  
+
+// http://www.brendansudol.com/posts/responsive-d3/
+function responsivefy(svg) {
+  /* get container + svg aspect ratio */
+  var container = d3.select(svg.node().parentNode),
+    width  = parseInt(svg.style('width')),
+    height = parseInt(svg.style('height')),
+    aspect = width / height;
+
+  // add viewBox and preserveAspectRatio props,
+  // and call resize so that svg resizes on initial page load
+  svg
+    .attr('viewBox', '0 0 ' + width + ' ' + height)
+    .attr('preserveAspectRatio', 'xMinYMid')
+    .call(resize)
+
+  // to register multiple listeners for the same event type,
+  // we need to namespace them, which we will using the id
+  // of our svg's container
+  d3.select(window)
+    .on('resize.' + container.attr('id'), resize);
+
+  function resize() {
+    var targetWidth = parseInt(container.style('width'));
+    svg
+      .attr('width', targetWidth)
+      .attr('height', Math.round(targetWidth / aspect));
+  }
+} // responsivefy
+
+function stateMouseover(d) {
+  var sel = d3.select(this);
+  sel.moveToFront();
+  sel
+    .style('stroke-width', '2')
+    .style('stroke', '#08306b');
+
+  focus
+    .select('text')
+    .remove();
+  
+  focus
+    .append('text')
+    .attr('x', 10)
+    .attr('y', 20)
+    .text(function() {
+      return d.properties.name + ' ' + 
+        d.properties.pct_change
+    })
+}
+
+/**
+ * Draw the legend
+ *
+ */
+function drawLegend() {
+  var legendW = 20, legendH = 20;
+  var legendGroup = context.append('g')
+    .classed('legend-group', true)
+    .attr('transform', 'translate(' + 
+      (width - (legendW + 30)) + ',0)');
 
     var legend = legendGroup.selectAll('.legend')
       .data(buckets)
@@ -123,12 +210,10 @@ d3.csv('data/state-change.csv', function(csv) {
       .append('g')
       .classed('legend', true)
 
-    var legendW = 20, legendH = 20;
-
     legend
       .append('rect')
       .attr({
-        x: 20,
+        x: 0,
         y: function(d, i) {
           return height - (i * legendH) - (2 * legendH);
         },
@@ -144,7 +229,7 @@ d3.csv('data/state-change.csv', function(csv) {
     legend
       .append('text')
       .attr({
-        x: 50,
+        x: 30,
         y: function(d, i) {
           return height - (i * legendH) - legendH - 4;
         },
@@ -152,42 +237,4 @@ d3.csv('data/state-change.csv', function(csv) {
       .text(function(d, i) {
         return buckets[i];
       });
-    
-    var states = g.selectAll('.state')
-      .data(usMap.features)
-      .enter()
-      .append('path')
-      .attr('d', path)
-      .style('fill', function(d) {
-        return color(d['properties']['pct_change']);
-      })
-      .classed('state', true)
-
-    states
-      .on('mouseover', stateMouseover)
-      .on('mouseout', function() {
-        d3.select(this).style('stroke-width', 1);
-      });
-  });
-}); // d3.csv
-
-function stateMouseover(d) {
-
-  var sel = d3.select(this);
-  sel.moveToFront();
-  sel
-    .style('stroke-width', '3');
-
-  focus
-    .select('text')
-    .remove();
-  
-  focus
-    .append('text')
-    .attr('x', 10)
-    .attr('y', 20)
-    .text(function() {
-      return d.properties.name + ' ' + 
-        d.properties.pct_change
-    })
 }

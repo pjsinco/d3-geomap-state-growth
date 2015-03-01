@@ -4,8 +4,12 @@ body {
 }
 
 .vis {
+  position: absolute;
   max-width: 40.625em;
   margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  
   /*background: aliceblue;*/
 }
 
