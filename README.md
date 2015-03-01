@@ -33,3 +33,13 @@ As mentioned by <a href="http://stackoverflow.com/users/598513/clemens-tolboom">
 </code></pre>
 
 * [Making a Simple Interactive Map Prototype with D3…For Total Beginners Who are Totally Impatient](https://suffenus.wordpress.com/2014/01/07/making-interactive-maps-with-d3-for-total-beginners/)
+
+###Sun Mar  1 05:55:14 2015 CST
+* [Building Responsive Visualizations with D3.js](https://blog.safaribooksonline.com/2014/02/17/building-responsible-visualizations-d3-js/)
+
+* [Responsive Charts with D3](http://eyeseast.github.io/visible-data/2013/08/28/responsive-charts-with-d3/)
+
+* [Responsive D3 Charting](http://www.brendansudol.com/posts/responsive-d3/)
+
+* [Responsive Charts With D3 And Pym.js](http://blog.apps.npr.org/2014/05/19/responsive-charts.html)
+
