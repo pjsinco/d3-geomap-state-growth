@@ -40,6 +40,8 @@ As mentioned by <a href="http://stackoverflow.com/users/598513/clemens-tolboom">
 * [Responsive Charts with D3](http://eyeseast.github.io/visible-data/2013/08/28/responsive-charts-with-d3/)
 
 * [Responsive D3 Charting](http://www.brendansudol.com/posts/responsive-d3/)
+    * This one is starred
 
 * [Responsive Charts With D3 And Pym.js](http://blog.apps.npr.org/2014/05/19/responsive-charts.html)
 
+###Mon Mar  2 06:00:07 2015 CST

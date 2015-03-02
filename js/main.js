@@ -54,6 +54,13 @@ var color = d3.scale.threshold()
     'rgb(66,146,198)','rgb(33,113,181)', 'rgb(8,69,148)'
   ]);
 
+var xScale = d3.scale.linear()
+  .range([ margin2.left, width2 ])
+
+var rectHeight = 30;
+
+var pctFormat = d3.format('%');
+
 /**
  * When mousing over a state, we need to move that <path> element to the 
  * front in order to properly expand the stroke width. Otherwise,
@@ -88,7 +95,9 @@ d3.csv('data/state-change.csv', function(csv) {
     return d['pct_change'];
   });
 
-  console.log(minPctChange, maxPctChange);
+  xScale
+    .domain([0, maxPctChange]);
+  //console.log(minPctChange, maxPctChange);
 
   d3.json('data/us-named.json', function(error, json) {
     var usMap = topojson.feature(json, json.objects.states);
@@ -180,6 +189,26 @@ function stateMouseover(d) {
     .style('stroke', '#08306b');
 
   focus
+    .select('rect')
+    .remove();
+
+  focus
+    .append('rect')
+    .attr({
+      x: 20,
+      y: 20,
+      width: function() {
+        return xScale(d.properties.pct_change);
+      },
+      height: rectHeight
+    })
+    .style({
+      fill: function() {
+        return color(d.properties.pct_change);
+      }
+    });
+
+  focus
     .select('text')
     .remove();
   
@@ -189,7 +218,7 @@ function stateMouseover(d) {
     .attr('y', 20)
     .text(function() {
       return d.properties.name + ' ' + 
-        d.properties.pct_change
+        pctFormat(d.properties.pct_change);
     })
 }
 
