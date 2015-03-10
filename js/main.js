@@ -237,6 +237,8 @@ function stateMouseover(d) {
   var avgGroup = focus
     .append('g')
     .classed('state-average-group', true)
+    .attr('transform', 'translate(20,0)'
+    );
 
   avgGroup
     .append('line')
@@ -275,7 +277,7 @@ function drawLegend() {
   var legendGroup = context.append('g')
     .classed('legend-group', true)
     .attr('transform', 'translate(' + 
-      (width - (legendW + 30)) + ',0)');
+      (width - (legendW + 60)) + ',0)');
 
   var legendPctFormat = d3.format('%');
   var legendBuckets = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60];
@@ -316,5 +318,6 @@ function drawLegend() {
     .attr(
       'font-family', 
       "'proxima-nova', 'Helvetica Neue', Helvetica, Arial, sans-serif"
-    );
+    )
+    .attr('font-size', '12')
 }
