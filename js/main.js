@@ -57,7 +57,7 @@ var color = d3.scale.threshold()
   ]);
 
 var xScale = d3.scale.linear()
-  .range([ margin2.left, width2 ])
+  .range([ margin2.left, (width2 - 50) ])
 
 var rectHeight = 30;
 
@@ -211,21 +211,39 @@ function stateMouseover(d) {
     });
 
   focus
-    .select('text')
+    .selectAll('text')
     .remove();
   
+  // Print the percentage
+  focus
+    .append('text')
+    .attr('x', function() {
+      return xScale(d.properties.pct_change) + 27;
+    })
+    .attr('y', 32)
+    .text(function() {
+      return pctFormat(d.properties.pct_change);
+    })
+    .attr(
+      'font-family', 
+      "'proxima-nova', 'Helvetica Neue', Helvetica, Arial, sans-serif"
+    )
+    .attr('font-size', '12')
+    .attr('text-anchor', 'start')
+    
+  // Print the state name
   focus
     .append('text')
     .attr('x', 20)
     .attr('y', 12)
     .text(function() {
-      return d.properties.name + ' ' + 
-        pctFormat(d.properties.pct_change);
+      return d.properties.name
     })
     .attr(
       'font-family', 
       "'proxima-nova', 'Helvetica Neue', Helvetica, Arial, sans-serif"
     );
+
 
   /**
    * Indicate average state growth
@@ -264,8 +282,6 @@ function stateMouseover(d) {
     .text('State average: ' + pctFormat(avgStateGrowth))
     .attr('font-size', '12')
     .style('fill', '#b3b3b3')
-    
-
 }
 
 /**
