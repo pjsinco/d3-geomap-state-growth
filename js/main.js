@@ -220,6 +220,10 @@ function stateMouseover(d) {
       return d.properties.name + ' ' + 
         pctFormat(d.properties.pct_change);
     })
+    .attr(
+      'font-family', 
+      "'proxima-nova', 'Helvetica Neue', Helvetica, Arial, sans-serif"
+    );
 }
 
 /**
