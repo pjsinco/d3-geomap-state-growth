@@ -59,7 +59,7 @@ var xScale = d3.scale.linear()
 
 var rectHeight = 30;
 
-var pctFormat = d3.format('%');
+var pctFormat = d3.format('.1%');
 
 /**
  * When mousing over a state, we need to move that <path> element to the 
@@ -214,8 +214,8 @@ function stateMouseover(d) {
   
   focus
     .append('text')
-    .attr('x', 10)
-    .attr('y', 20)
+    .attr('x', 20)
+    .attr('y', 12)
     .text(function() {
       return d.properties.name + ' ' + 
         pctFormat(d.properties.pct_change);
