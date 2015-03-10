@@ -47,6 +47,8 @@ var path = d3.geo.path().projection(projection);
 
 var buckets = [0.20, 0.30, 0.40, 0.50, 0.60];
 
+var avgStateGrowth = 0.347;
+
 var color = d3.scale.threshold()
   .domain(buckets)
   .range([
@@ -224,6 +226,44 @@ function stateMouseover(d) {
       'font-family', 
       "'proxima-nova', 'Helvetica Neue', Helvetica, Arial, sans-serif"
     );
+
+  /**
+   * Indicate average state growth
+   */
+  focus
+    .select('.state-average-group')
+    .remove();
+
+  var avgGroup = focus
+    .append('g')
+    .classed('state-average-group', true)
+
+  avgGroup
+    .append('line')
+    .classed('state-average', true)
+    .attr('x1', function() {
+      return xScale( avgStateGrowth );
+    })
+    .attr('x2', function() {
+      return xScale( avgStateGrowth );
+    })
+    .attr('y1', 0)
+    .attr('y2', 40)
+    .style('fill', '#b3b3b3')
+    .style('stroke', '#b3b3b3')
+    .style('stroke-width', 1)
+
+  avgGroup
+    .append('text')
+    .attr('x', function() {
+      return xScale(avgStateGrowth) + 5;
+    })
+    .attr('y', 10)
+    .text('State average: ' + pctFormat(avgStateGrowth))
+    .attr('font-size', '12')
+    .style('fill', '#b3b3b3')
+    
+
 }
 
 /**
@@ -237,6 +277,7 @@ function drawLegend() {
     .attr('transform', 'translate(' + 
       (width - (legendW + 30)) + ',0)');
 
+  var legendPctFormat = d3.format('%');
   var legendBuckets = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60];
   var legend = legendGroup.selectAll('.legend')
     .data( legendBuckets )
@@ -270,7 +311,7 @@ function drawLegend() {
     })
     .text(function(d, i) {
       if ( i == 0 ) return;
-      return legendBuckets[i];
+      return legendPctFormat(legendBuckets[i]);
     })
     .attr(
       'font-family', 
