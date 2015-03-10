@@ -47,3 +47,4 @@ As mentioned by <a href="http://stackoverflow.com/users/598513/clemens-tolboom">
 ###Mon Mar  2 06:00:07 2015 CST
 
 ###Tue Mar 10 11:35:08 2015 CDT
+* [choropleth map on vida.io](https://vida.io/documents/s9YvtzpRsWm628Muq)
