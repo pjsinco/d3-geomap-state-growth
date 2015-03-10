@@ -237,37 +237,43 @@ function drawLegend() {
     .attr('transform', 'translate(' + 
       (width - (legendW + 30)) + ',0)');
 
-    var legend = legendGroup.selectAll('.legend')
-      .data(buckets)
-      .enter()
-      .append('g')
-      .classed('legend', true)
+  var legendBuckets = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60];
+  var legend = legendGroup.selectAll('.legend')
+    .data( legendBuckets )
+    .enter()
+    .append('g')
+    .classed('legend', true)
 
-    legend
-      .append('rect')
-      .attr({
-        x: 0,
-        y: function(d, i) {
-          return height - (i * legendH) - (2 * legendH);
-        },
-        width: legendW,
-        height: legendH,
-      })
-      .style({
-        fill: function(d, i) {
-          return color(d);
-        }
-      })
+  legend
+    .append('rect')
+    .attr({
+      x: 0,
+      y: function(d, i) {
+        return height - (i * legendH) - (2 * legendH);
+      },
+      width: legendW,
+      height: legendH,
+    })
+    .style({
+      fill: function(d, i) {
+        return color(d);
+      }
+    })
 
-    legend
-      .append('text')
-      .attr({
-        x: 30,
-        y: function(d, i) {
-          return height - (i * legendH) - legendH - 4;
-        },
-      })
-      .text(function(d, i) {
-        return buckets[i];
-      });
+  legend
+    .append('text')
+    .attr({
+      x: 30,
+      y: function(d, i) {
+        return height - (i * legendH) - legendH + 5;
+      },
+    })
+    .text(function(d, i) {
+      if ( i == 0 ) return;
+      return legendBuckets[i];
+    })
+    .attr(
+      'font-family', 
+      "'proxima-nova', 'Helvetica Neue', Helvetica, Arial, sans-serif"
+    );
 }
