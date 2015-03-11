@@ -59,21 +59,9 @@ var color = d3.scale.threshold()
 var xScale = d3.scale.linear()
   .range([ margin2.left, (width2 - 50) ])
 
-var rectHeight = 30;
+var rectHeight = 17;
 
 var pctFormat = d3.format('.1%');
-
-/**
- * When mousing over a state, we need to move that <path> element to the 
- * front in order to properly expand the stroke width. Otherwise,
- * the stroke might be overlapped by other <path> elems.
- */
-d3.selection.prototype.moveToFront = function() {
-  return this.each(function() {
-    this.parentNode.appendChild(this);
-  });
-};
-
 
 d3.csv('data/state-change.csv', function(csv) {
   csv = csv.map(function(d) {
@@ -142,15 +130,12 @@ d3.csv('data/state-change.csv', function(csv) {
 
     states
       .on('mouseover', stateMouseover)
-      .on('mouseout', function() {
+      .on('mouseout', function(d) {
         d3.select(this)
           .style('stroke-width', 1)
           .style('stroke', '#fff');
       });
   });
-
-  //d3.select(window)
-    //.on('resize', resize);
 }); // d3.csv
   
 
@@ -184,9 +169,17 @@ function responsivefy(svg) {
 } // responsivefy
 
 function stateMouseover(d) {
-  var sel = d3.select(this);
-  sel.moveToFront();
-  sel
+
+  // bring the state to the top
+  // see: http://stackoverflow.com/questions/14167863/
+  //     how-can-i-bring-a-circle-to-the-front-with-d3
+  d3.select('.country').selectAll('.state')
+    .sort(function(a, b) {
+      s = d.id; 
+      return (a.id == s) - (b.id == s);
+    });
+
+  d3.select(this)
     .style('stroke-width', '2')
     .style('stroke', '#08306b');
 
@@ -268,7 +261,7 @@ function stateMouseover(d) {
       return xScale( avgStateGrowth );
     })
     .attr('y1', 0)
-    .attr('y2', 40)
+    .attr('y2', 37)
     .style('fill', '#b3b3b3')
     .style('stroke', '#b3b3b3')
     .style('stroke-width', 1)
