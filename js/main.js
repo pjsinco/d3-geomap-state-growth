@@ -320,6 +320,21 @@ function drawLegend() {
     })
 
   legend
+    .append('line')
+    .attr('x1', 0)
+    .attr('x2', 25)
+    .attr('y1', function(d, i) {
+      if (i == (legendBuckets.length - 1)) return;
+      return height - (i * legendH) - (2 * legendH);
+    })
+    .attr('y2', function(d, i) {
+      if (i == (legendBuckets.length - 1)) return;
+      return height - (i * legendH) - (2 * legendH);
+    })
+    .style('stroke', '#2a2a2a')
+    .style('stroke-width', '1')
+
+  legend
     .append('text')
     .attr({
       x: 30,
@@ -336,4 +351,5 @@ function drawLegend() {
       "'proxima-nova', 'Helvetica Neue', Helvetica, Arial, sans-serif"
     )
     .attr('font-size', '12')
+
 }
