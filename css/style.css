@@ -21,3 +21,12 @@ svg .state {
 svg .state:hover {
   /*fill-opacity: 0.5;*/
 }
+
+svg .tick line {
+  stroke: #333;
+  stroke-width: 1;
+}
+
+.axis path {
+  display: none;
+}
