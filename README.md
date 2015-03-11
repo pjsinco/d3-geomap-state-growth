@@ -32,6 +32,25 @@ As mentioned by <a href="http://stackoverflow.com/users/598513/clemens-tolboom">
 };
 </code></pre>
 
+**And here's the IE9-compatible version, which we're actually using!**
+<p>From my painful experience with IE9, using parentNode.appendChild may lead to lost event handlers in the nodes. So I tend to use another approach, that is, sorting the nodes so that the selected one is above the others:</p>
+
+<pre><code>     .on("mouseover", function(selected) {
+        vis.selectAll('.node')
+        .sort(function(a, b) {
+          if (a.id === selected.id) {
+            return 1;
+          } else {
+            if (b.id === selected.id) {
+              return -1;
+            } else {
+              return 0;
+            }
+          }
+        });
+      })
+</code></pre>
+
 * [Making a Simple Interactive Map Prototype with D3…For Total Beginners Who are Totally Impatient](https://suffenus.wordpress.com/2014/01/07/making-interactive-maps-with-d3-for-total-beginners/)
 
 ###Sun Mar  1 05:55:14 2015 CST
