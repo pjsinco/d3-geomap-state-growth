@@ -63,6 +63,11 @@ var rectHeight = 17;
 
 var pctFormat = d3.format('.1%');
 
+
+/**
+ * Main
+ *
+ */
 d3.csv('data/state-change.csv', function(csv) {
   csv = csv.map(function(d) {
     return {
@@ -87,11 +92,12 @@ d3.csv('data/state-change.csv', function(csv) {
 
   xScale
     .domain([0, maxPctChange]);
-  //console.log(minPctChange, maxPctChange);
 
   d3.json('data/us-named.json', function(error, json) {
     var usMap = topojson.feature(json, json.objects.states);
     var csvLen = csv.length;
+
+    var kickoffState = json.objects.states.geometries[46];
 
     // Merge the data from our CSV with our map
     for (var i = 0; i < csvLen; i++) {
@@ -112,7 +118,6 @@ d3.csv('data/state-change.csv', function(csv) {
       }
     }
 
-    drawLegend();
     
     /**
      * Draw the map
@@ -127,19 +132,31 @@ d3.csv('data/state-change.csv', function(csv) {
         return color(d['properties']['pct_change']);
       })
       .classed('state', true)
-
     states
       .on('mouseover', stateMouseover)
-      .on('mouseout', function(d) {
+      .on('mouseout', function() {
         d3.select(this)
           .style('stroke-width', 1)
           .style('stroke', '#fff');
       });
-  });
-}); // d3.csv
-  
 
-// http://www.brendansudol.com/posts/responsive-d3/
+    // kickoff vis
+    drawLegend();
+    focusDrawBar(kickoffState);
+    focusAddStateName(kickoffState);
+    focusAddPercentage(kickoffState);
+    drawAverageStateGrowth();
+  });
+
+}); // d3.csv
+
+
+/**
+ * Make the vis responsive
+ *
+ * http://www.brendansudol.com/posts/responsive-d3/
+ *
+ */
 function responsivefy(svg) {
   /* get container + svg aspect ratio */
   var container = d3.select(svg.node().parentNode),
@@ -168,17 +185,12 @@ function responsivefy(svg) {
   }
 } // responsivefy
 
+/**
+ * Render focus info
+ *
+ */
 function stateMouseover(d) {
-
-  // bring the state to the top
-  // see: http://stackoverflow.com/questions/14167863/
-  //     how-can-i-bring-a-circle-to-the-front-with-d3
-  d3.select('.country').selectAll('.state')
-    .sort(function(a, b) {
-      s = d.id; 
-      return (a.id == s) - (b.id == s);
-    });
-
+  bringStateToTop(d);
   d3.select(this)
     .style('stroke-width', '2')
     .style('stroke', '#08306b');
@@ -188,59 +200,34 @@ function stateMouseover(d) {
     .remove();
 
   focus
-    .append('rect')
-    .attr({
-      x: 20,
-      y: 20,
-      width: function() {
-        return xScale(d.properties.pct_change);
-      },
-      height: rectHeight
-    })
-    .style({
-      fill: function() {
-        return color(d.properties.pct_change);
-      }
-    });
-
-  focus
     .selectAll('text')
     .remove();
-  
-  // Print the percentage
-  focus
-    .append('text')
-    .attr('x', function() {
-      return xScale(d.properties.pct_change) + 27;
-    })
-    .attr('y', 32)
-    .text(function() {
-      return pctFormat(d.properties.pct_change);
-    })
-    .attr(
-      'font-family', 
-      "'proxima-nova', 'Helvetica Neue', Helvetica, Arial, sans-serif"
-    )
-    .attr('font-size', '12')
-    .attr('text-anchor', 'start')
-    
-  // Print the state name
-  focus
-    .append('text')
-    .attr('x', 20)
-    .attr('y', 12)
-    .text(function() {
-      return d.properties.name
-    })
-    .attr(
-      'font-family', 
-      "'proxima-nova', 'Helvetica Neue', Helvetica, Arial, sans-serif"
-    );
 
+  focusDrawBar(d);
+  focusAddStateName(d);
+  drawAverageStateGrowth();
+  focusAddPercentage(d);
+}
 
-  /**
-   * Indicate average state growth
-   */
+/**
+ * IE9-compatible way to bring the state to the top
+ * so we can properly outine it when moused-over
+ *
+ * see: http://stackoverflow.com/questions/14167863/
+ *     how-can-i-bring-a-circle-to-the-front-with-d3
+ */
+function bringStateToTop(d) {
+  d3.select('.country').selectAll('.state')
+    .sort(function(a, b) {
+      s = d.id; 
+      return (a.id == s) - (b.id == s);
+    });
+}
+
+/**
+ * Indicate average state growth
+ */
+function drawAverageStateGrowth() {
   focus
     .select('.state-average-group')
     .remove();
@@ -262,8 +249,8 @@ function stateMouseover(d) {
     })
     .attr('y1', 0)
     .attr('y2', 37)
-    .style('fill', '#b3b3b3')
-    .style('stroke', '#b3b3b3')
+    .style('fill', '#eaeaea')
+    .style('stroke', '#eaeaea')
     .style('stroke-width', 1)
 
   avgGroup
@@ -312,20 +299,27 @@ function drawLegend() {
       }
     })
 
-  legend
+  var tickData = legendBuckets.filter(function(d, i){
+      return i > 0;
+  });
+
+  var ticks = legendGroup.selectAll('.tick')
+    .data(tickData)
+    .enter()
+
+  ticks
     .append('line')
+    .classed('tick', true)
     .attr('x1', 0)
     .attr('x2', 25)
     .attr('y1', function(d, i) {
-      if (i == (legendBuckets.length - 1)) return;
       return height - (i * legendH) - (2 * legendH);
     })
     .attr('y2', function(d, i) {
-      if (i == (legendBuckets.length - 1)) return;
       return height - (i * legendH) - (2 * legendH);
     })
     .style('stroke', '#2a2a2a')
-    .style('stroke-width', '1')
+    //.style('stroke-width', '1')
 
   legend
     .append('text')
@@ -344,5 +338,69 @@ function drawLegend() {
       "'proxima-nova', 'Helvetica Neue', Helvetica, Arial, sans-serif"
     )
     .attr('font-size', '12')
-
 }
+
+/**
+ * Draw the one bar in the focus area
+ *
+ */
+function focusDrawBar(d) {
+  focus
+    .append('rect')
+    .attr({
+      x: 20,
+      y: 20,
+      width: function() {
+        return xScale(d.properties.pct_change);
+      },
+      height: rectHeight
+    })
+    .style({
+      fill: function() {
+        return color(d.properties.pct_change);
+      }
+    });
+}
+
+/**
+ * Add the state name to the focus area
+ *
+ */
+function focusAddStateName(d) {
+  // Print the state name
+  focus
+    .append('text')
+    .attr('x', 20)
+    .attr('y', 12)
+    .text(function() {
+      return d.properties.name
+    })
+    .attr(
+      'font-family', 
+      "'proxima-nova', 'Helvetica Neue', Helvetica, Arial, sans-serif"
+    );
+}
+
+/**
+ * Add the percentage to the bar
+ *
+ */
+function focusAddPercentage(d) {
+  // Print the percentage
+  focus
+    .append('text')
+    .attr('x', function() {
+      return xScale(d.properties.pct_change) + 27;
+    })
+    .attr('y', 32)
+    .text(function() {
+      return pctFormat(d.properties.pct_change);
+    })
+    .attr(
+      'font-family', 
+      "'proxima-nova', 'Helvetica Neue', Helvetica, Arial, sans-serif"
+    )
+    .attr('font-size', '12')
+    .attr('text-anchor', 'start')
+}
+
